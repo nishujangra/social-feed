@@ -1,10 +1,11 @@
 package graphql
 
 import (
-	"sort"
+	"context"
 	"time"
 
 	"github.com/graph-gophers/graphql-go"
+	pb "github.com/nishujangra/social-feed/postpb"
 )
 
 type Post struct {
@@ -21,7 +22,9 @@ var follows = map[string][]string{
 	"3": {"1"},      // user 3 follows 1
 }
 
-type Resolver struct{}
+type Resolver struct {
+	PostService pb.PostServiceClient
+}
 
 type postResolver struct {
 	p *Post
@@ -30,48 +33,27 @@ type postResolver struct {
 func (r *Resolver) GetTimeline(agrs struct {
 	UserId string
 }) ([]*postResolver, error) {
-	posts := []*Post{
-		{
-			ID:        "1",
-			AuthorID:  "1",
-			Title:     "Post 1",
-			Content:   "Content of Post 1",
-			Timestamp: time.Now().Add(-1 * time.Hour),
-		},
-		{
-			ID:        "2",
-			AuthorID:  "2",
-			Title:     "Post 2",
-			Content:   "Content of Post 2",
-			Timestamp: time.Now().Add(-2 * time.Hour),
-		},
-		{
-			ID:        "3",
-			AuthorID:  "3",
-			Title:     "Post 3",
-			Content:   "Content of Post 3",
-			Timestamp: time.Now().Add(-3 * time.Hour),
-		},
-	}
-
-	var filteredPosts []*postResolver
-	for _, post := range posts {
-		for _, following := range follows[agrs.UserId] {
-			if post.AuthorID == following {
-				filteredPosts = append(filteredPosts, &postResolver{p: post})
-			}
-		}
-	}
-
-	sort.Slice(filteredPosts, func(i, j int) bool {
-		return filteredPosts[i].p.Timestamp.After(filteredPosts[j].p.Timestamp)
+	ctx := context.Background()
+	response, err := r.PostService.ListPostsByUser(ctx, &pb.ListPostsRequest{
+		UserId: agrs.UserId,
 	})
-
-	if len(filteredPosts) > 20 {
-		filteredPosts = filteredPosts[:20]
+	if err != nil {
+		return nil, err
 	}
 
-	return filteredPosts, nil
+	var posts []*postResolver
+	for _, post := range response.Posts {
+		posts = append(posts, &postResolver{
+			p: &Post{
+				ID:        post.Id,
+				AuthorID:  post.AuthorId,
+				Title:     post.Title,
+				Content:   post.Content,
+				Timestamp: time.Now(), // Assuming the timestamp is set to now for simplicity
+			},
+		})
+	}
+	return posts, nil
 }
 
 func (r *postResolver) ID() graphql.ID { return graphql.ID(r.p.ID) }
