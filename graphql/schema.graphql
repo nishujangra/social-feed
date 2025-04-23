@@ -1,0 +1,15 @@
+schema {
+    query: Query
+}
+
+type Post {
+    id: ID!
+    authorId: ID!
+    title: String!
+    content: String!
+    timestamp: String!
+}
+
+type Query {
+    getTimeline(userId: ID!): [Post!]!
+}
