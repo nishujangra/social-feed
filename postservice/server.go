@@ -10,6 +10,7 @@ import (
 	"google.golang.org/grpc"
 
 	"github.com/nishujangra/social-feed/postpb"
+	"github.com/nishujangra/social-feed/postservice/mockdata"
 )
 
 type server struct {
@@ -17,10 +18,10 @@ type server struct {
 }
 
 func (s *server) ListPostsByUser(ctx context.Context, req *postpb.ListPostsRequest) (*postpb.ListPostsResponse, error) {
-	following := userFollows[req.UserId]
+	following := mockdata.UserFollows[req.UserId]
 
 	var filteredPosts []*postpb.Post
-	for _, post := range mockPosts {
+	for _, post := range mockdata.MockPosts {
 		for _, follows := range following {
 			if post.AuthorId == follows {
 				filteredPosts = append(filteredPosts, post)

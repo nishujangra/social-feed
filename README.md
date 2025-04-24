@@ -77,10 +77,12 @@ This project is a simple social feed service using:
 ├── proto/
 │      └── post.proto
 ├── postservice/            # Simulated gRPC Post Service
-│   ├── server.go
-│   └── main.go
+│   ├── mockdata/
+│       └── mockPost.go
+│   └── server.go
 ├── main.go                 # Starts the GraphQL server
 ├── go.mod
+├── .gitignore
 └── README.md
 ```
 
@@ -113,7 +115,7 @@ go run postservice/server.go
 ```bash
 curl -X POST http://localhost:8080/graphql \
   -H "Content-Type: application/json" \
-  -d '{"query":"{ getTimeline(userId: \"1\") { id authorId title content createdAt } }"}'
+  -d '{"query":"{ getTimeline(userId: \"1\") { id authorId title content timestamp } }"}'
 ```
 
 ---
