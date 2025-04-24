@@ -59,11 +59,15 @@ This project is a simple social feed service using:
    go run server.go
    ```
 
+   The gRPC service runs on: `localhost:50051` (default gRPC port)
+
 6. **Run GraphQL Server**
    In another terminal:
    ```bash
    go run main.go
    ```
+
+   The GraphQL server runs on: `http://localhost:8080/graphql` (HTTP)
 
 ---
 
@@ -108,6 +112,42 @@ You can test it using GraphiQL, Postman, or `curl`.
 ```bash
 go run postservice/server.go
 ```
+---
+
+## 🧪 Mock Data Configuration
+
+The service uses simulated data for testing:
+
+### Posts Data (`postservice/mockdata/mockPost.go`)
+```go
+var MockPosts = []*postpb.Post{
+  {Id: "1", AuthorId: "1", Title: "Go Routines", ...},
+  {Id: "2", AuthorId: "2", Title: "Microservices", ...},
+  // ... 7 total mock posts
+}
+```
+
+### Follow Relationships
+```go
+var UserFollows = map[string][]string{
+  "1": {"2", "3"},      // User 1 follows 2 and 3
+  "2": {"1", "3", "5"}, // User 2 follows 1, 3 and 5
+  // ... more relationships
+}
+```
+
+### Key Details:
+- **Pre-configured Users**: IDs 1-5
+- **Sample Content**: Tech posts, travel blogs, and personal updates
+- **Timestamps**: Posts span from 5-120 minutes old (relative to server start)
+
+### Customization:
+Edit the mock data by modifying:
+```
+postservice/mockdata/mockPost.go
+```
+Changes take effect when you restart the gRPC server.
+
 ---
 
 ## 🧪 Sample GraphQL Query (via cURL)
